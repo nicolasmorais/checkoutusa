@@ -70,6 +70,7 @@ export function CheckoutClient({
   initialShipping,
   initialPixelSettings,
   initialAnnouncementBar,
+  initialButtonColors,
 }: {
   product: Product;
   initialLogoUrl?: string | null;
@@ -82,6 +83,7 @@ export function CheckoutClient({
     textColor: string;
     fontSize: number;
   };
+  initialButtonColors?: { bg: string; text: string };
 }) {
   const searchParams = useSearchParams();
   const pixelSettings = usePixelSettings(initialPixelSettings);
@@ -125,6 +127,7 @@ export function CheckoutClient({
     textColor: "#ffffff",
     fontSize: 12,
   };
+  const buttonColors = initialButtonColors ?? { bg: "#008060", text: "#ffffff" };
 
   const shippingDecided = !product.requiresShipping || step >= 2;
   const shippingCents = product.requiresShipping ? shipping.priceCents : 0;
@@ -401,7 +404,8 @@ export function CheckoutClient({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-md bg-[#008060] py-3.5 text-base font-semibold text-white transition hover:bg-[#006e52] disabled:opacity-50"
+                  style={{ backgroundColor: buttonColors.bg, color: buttonColors.text }}
+                  className="w-full rounded-md py-3.5 text-base font-semibold transition hover:brightness-90 disabled:opacity-50"
                 >
                   {loading
                     ? "Loading..."
@@ -437,7 +441,8 @@ export function CheckoutClient({
                   type="button"
                   onClick={createPaymentIntent}
                   disabled={loading}
-                  className="w-full rounded-md bg-[#008060] py-3.5 text-base font-semibold text-white transition hover:bg-[#006e52] disabled:opacity-50"
+                  style={{ backgroundColor: buttonColors.bg, color: buttonColors.text }}
+                  className="w-full rounded-md py-3.5 text-base font-semibold transition hover:brightness-90 disabled:opacity-50"
                 >
                   {loading ? "Loading..." : "Continue to payment"}
                 </button>
@@ -454,6 +459,7 @@ export function CheckoutClient({
                   shipping={product.requiresShipping ? shipping : null}
                   onEditContact={() => goToStep(1)}
                   onEditShipping={() => goToStep(2)}
+                  buttonColors={buttonColors}
                 />
               </Elements>
             )}
@@ -606,6 +612,7 @@ function PaymentStep({
   shipping,
   onEditContact,
   onEditShipping,
+  buttonColors,
 }: {
   totalCents: number;
   currency: string;
@@ -614,6 +621,7 @@ function PaymentStep({
   shipping: ShippingSettings | null;
   onEditContact: () => void;
   onEditShipping: () => void;
+  buttonColors: { bg: string; text: string };
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -679,7 +687,8 @@ function PaymentStep({
         <button
           type="submit"
           disabled={!stripe || !paymentElementReady || submitting}
-          className="w-full rounded-md bg-[#008060] py-3.5 text-base font-semibold text-white transition hover:bg-[#006e52] disabled:opacity-50"
+          style={{ backgroundColor: buttonColors.bg, color: buttonColors.text }}
+          className="w-full rounded-md py-3.5 text-base font-semibold transition hover:brightness-90 disabled:opacity-50"
         >
           {submitting ? "Processing..." : `Pay now · ${formatCents(totalCents, currency)}`}
         </button>

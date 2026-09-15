@@ -40,6 +40,10 @@ export default async function CheckoutPage({
           textColor: checkoutSettings?.announcementBarTextColor ?? "#ffffff",
           fontSize: checkoutSettings?.announcementBarFontSize ?? 12,
         }}
+        initialButtonColors={{
+          bg: checkoutSettings?.buttonColor ?? "#008060",
+          text: checkoutSettings?.buttonTextColor ?? "#ffffff",
+        }}
         initialShipping={{
           label: shippingSettings?.label ?? "Standard Shipping",
           estimatedDays: shippingSettings?.estimatedDays ?? "5-7 business days",

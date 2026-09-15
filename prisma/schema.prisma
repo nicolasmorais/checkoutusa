@@ -116,6 +116,8 @@ model CheckoutSettings {
   announcementBarBgColor  String   @default("#008060")
   announcementBarTextColor String  @default("#ffffff")
   announcementBarFontSize Int      @default(12)
+  buttonColor             String   @default("#008060")
+  buttonTextColor         String   @default("#ffffff")
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 

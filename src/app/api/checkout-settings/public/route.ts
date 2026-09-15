@@ -10,5 +10,7 @@ export async function GET() {
     announcementBarBgColor: settings?.announcementBarBgColor ?? "#008060",
     announcementBarTextColor: settings?.announcementBarTextColor ?? "#ffffff",
     announcementBarFontSize: settings?.announcementBarFontSize ?? 12,
+    buttonColor: settings?.buttonColor ?? "#008060",
+    buttonTextColor: settings?.buttonTextColor ?? "#ffffff",
   });
 }

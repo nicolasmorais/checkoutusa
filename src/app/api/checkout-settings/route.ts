@@ -39,6 +39,12 @@ export async function PUT(req: NextRequest) {
     32,
     Math.max(10, Number.isFinite(Number(body.announcementBarFontSize)) ? Number(body.announcementBarFontSize) : 12)
   );
+  const buttonColor =
+    typeof body.buttonColor === "string" && HEX_RE.test(body.buttonColor) ? body.buttonColor : "#008060";
+  const buttonTextColor =
+    typeof body.buttonTextColor === "string" && HEX_RE.test(body.buttonTextColor)
+      ? body.buttonTextColor
+      : "#ffffff";
 
   const data = {
     logoUrl: logoUrl || null,
@@ -47,6 +53,8 @@ export async function PUT(req: NextRequest) {
     announcementBarBgColor,
     announcementBarTextColor,
     announcementBarFontSize,
+    buttonColor,
+    buttonTextColor,
   };
 
   const settings = await prisma.checkoutSettings.upsert({

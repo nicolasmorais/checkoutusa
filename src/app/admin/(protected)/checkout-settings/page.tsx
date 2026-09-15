@@ -16,6 +16,8 @@ export default async function CheckoutSettingsPage() {
       initialAnnouncementBarBgColor={settings.announcementBarBgColor}
       initialAnnouncementBarTextColor={settings.announcementBarTextColor}
       initialAnnouncementBarFontSize={settings.announcementBarFontSize}
+      initialButtonColor={settings.buttonColor}
+      initialButtonTextColor={settings.buttonTextColor}
     />
   );
 }
