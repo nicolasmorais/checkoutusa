@@ -61,6 +61,24 @@ const FULL_NAME_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ'-]{2,}(?:\s+[A-Za-zÀ-ÖØ-öø
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
 const CITY_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ'\-\s]{2,}$/;
 const ZIP_REGEX = /^\d{5}(-\d{4})?$/;
+// NANP (US/Canada) rule: area code and exchange code can't start with 0 or 1.
+const US_PHONE_DIGITS_REGEX = /^[2-9]\d{2}[2-9]\d{6}$/;
+
+function usPhoneDigits(value: string): string {
+  const digits = value.replace(/\D/g, "");
+  return digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+}
+
+function formatUsPhone(value: string): string {
+  const digits = usPhoneDigits(value).slice(0, 10);
+  const area = digits.slice(0, 3);
+  const exchange = digits.slice(3, 6);
+  const line = digits.slice(6, 10);
+  if (digits.length > 6) return `(${area}) ${exchange}-${line}`;
+  if (digits.length > 3) return `(${area}) ${exchange}`;
+  if (digits.length > 0) return `(${area}`;
+  return "";
+}
 
 type FieldErrors = Partial<Record<keyof FormState, string>>;
 
@@ -73,8 +91,8 @@ function validateContactFields(form: FormState, requiresShipping: boolean): Fiel
   if (!EMAIL_REGEX.test(form.customerEmail.trim())) {
     errors.customerEmail = "Enter a valid email address";
   }
-  if (form.customerPhone.replace(/\D/g, "").length < 10) {
-    errors.customerPhone = "Enter a valid phone number";
+  if (!US_PHONE_DIGITS_REGEX.test(usPhoneDigits(form.customerPhone))) {
+    errors.customerPhone = "Enter a valid US phone number";
   }
 
   if (requiresShipping) {
@@ -404,10 +422,11 @@ export function CheckoutClient({
                         inputMode="tel"
                         autoComplete="tel"
                         placeholder="(555) 000-0000"
+                        maxLength={14}
                         className={cn(inputClass, fieldErrors.customerPhone && errorInputClass)}
                         aria-invalid={!!fieldErrors.customerPhone}
                         value={form.customerPhone}
-                        onChange={(e) => updateField("customerPhone", e.target.value)}
+                        onChange={(e) => updateField("customerPhone", formatUsPhone(e.target.value))}
                       />
                       {fieldErrors.customerPhone && <p className={fieldErrorClass}>{fieldErrors.customerPhone}</p>}
                     </div>

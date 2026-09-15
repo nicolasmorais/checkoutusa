@@ -6,6 +6,13 @@ import { z } from "zod";
 const FULL_NAME_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ'-]{2,}(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ'-]{2,})+$/;
 const CITY_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ'\-\s]{2,}$/;
 const ZIP_REGEX = /^\d{5}(-\d{4})?$/;
+// NANP (US/Canada) rule: area code and exchange code can't start with 0 or 1.
+const US_PHONE_DIGITS_REGEX = /^[2-9]\d{2}[2-9]\d{6}$/;
+
+function usPhoneDigits(value: string): string {
+  const digits = value.replace(/\D/g, "");
+  return digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+}
 
 const schema = z.object({
   productId: z.string().min(1),
@@ -18,7 +25,7 @@ const schema = z.object({
   customerPhone: z
     .string()
     .trim()
-    .refine((v) => v.replace(/\D/g, "").length >= 10, "Enter a valid phone number"),
+    .refine((v) => US_PHONE_DIGITS_REGEX.test(usPhoneDigits(v)), "Enter a valid US phone number"),
   shippingAddressLine1: z.string().trim().min(3),
   shippingAddressLine2: z.string().trim().min(1),
   shippingCity: z.string().trim().regex(CITY_REGEX, "Enter a valid city"),
