@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Plus, Trash2 } from "lucide-react";
+import { IntegrationCard } from "./IntegrationCard";
 
 export type TaboolaPixelRow = { id: string; name: string; pixelId: string };
 
@@ -47,29 +49,26 @@ export function TaboolaPixelsManager({ initial }: { initial: TaboolaPixelRow[] }
   }
 
   return (
-    <div className="space-y-4 rounded-lg border border-neutral-200 bg-white p-6">
-      <div>
-        <h2 className="font-medium">Taboola</h2>
-        <p className="mt-0.5 text-xs text-neutral-500">
-          Register the Taboola pixels you use, then activate one per product from the product page.
-        </p>
-      </div>
+    <IntegrationCard letter="Tb" color="#0053A0" title="Taboola" connected={pixels.length > 0}>
+      <p className="-mt-1 mb-1 text-xs text-neutral-400">
+        Register the pixels you use, then activate one per product from the product page.
+      </p>
 
       <form onSubmit={handleAdd} className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1">
-          <label className="text-sm font-medium">Name</label>
+          <label className="text-xs font-medium text-neutral-600">Name</label>
           <input
             placeholder="Campaign A"
-            className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2"
+            className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         </div>
         <div className="flex-1">
-          <label className="text-sm font-medium">Pixel ID</label>
+          <label className="text-xs font-medium text-neutral-600">Pixel ID</label>
           <input
             placeholder="1234567"
-            className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2"
+            className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
             value={pixelId}
             onChange={(e) => setPixelId(e.target.value)}
           />
@@ -77,33 +76,40 @@ export function TaboolaPixelsManager({ initial }: { initial: TaboolaPixelRow[] }
         <button
           type="submit"
           disabled={saving}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="flex items-center justify-center gap-1.5 rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:opacity-50"
         >
-          {saving ? "Adding..." : "Add pixel"}
+          <Plus size={15} />
+          {saving ? "Adding..." : "Add"}
         </button>
       </form>
 
       {pixels.length > 0 ? (
-        <ul className="divide-y divide-neutral-200 rounded-md border border-neutral-200">
+        <div className="overflow-hidden rounded-md border border-neutral-200">
           {pixels.map((p) => (
-            <li key={p.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
-              <div>
-                <p className="text-sm font-medium">{p.name}</p>
-                <p className="text-xs text-neutral-500">{p.pixelId}</p>
+            <div
+              key={p.id}
+              className="flex items-center justify-between gap-3 border-b border-neutral-100 px-3.5 py-2.5 last:border-0 hover:bg-neutral-50"
+            >
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-neutral-900">{p.name}</p>
+                <p className="font-mono text-xs text-neutral-400">{p.pixelId}</p>
               </div>
               <button
                 type="button"
                 onClick={() => handleDelete(p.id)}
-                className="text-sm font-medium text-red-600 hover:text-red-700"
+                className="flex-shrink-0 rounded-md p-1.5 text-neutral-400 transition hover:bg-red-50 hover:text-red-600"
+                aria-label={`Remove ${p.name}`}
               >
-                Remove
+                <Trash2 size={15} />
               </button>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       ) : (
-        <p className="text-sm text-neutral-500">No Taboola pixels registered yet.</p>
+        <p className="rounded-md border border-dashed border-neutral-200 py-6 text-center text-sm text-neutral-400">
+          No Taboola pixels registered yet.
+        </p>
       )}
-    </div>
+    </IntegrationCard>
   );
 }

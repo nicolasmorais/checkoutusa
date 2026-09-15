@@ -13,7 +13,7 @@ export default async function PixelsPage() {
   ]);
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="max-w-4xl space-y-8">
       <PixelsFormClient
         initial={{
           metaPixelId: settings.metaPixelId ?? "",
