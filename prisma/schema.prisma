@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  description      String?
+  imageUrl         String?
+  priceCents       Int
+  compareAtCents   Int?
+  currency         String   @default("usd")
+  active           Boolean  @default(true)
+  requiresShipping Boolean  @default(true)
+  stock            Int?
+  taboolaPixelId   String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@map("products")
+}
+
+model Order {
+  id            String @id @default(cuid())
+  number        Int    @unique @default(autoincrement())
+  status        String @default("pending") // pending, paid, failed, refunded, canceled
+  currency      String @default("usd")
+  subtotalCents Int
+  shippingCents Int    @default(0)
+  totalCents    Int
+
+  customerName  String
+  customerEmail String
+  customerPhone String?
+
+  shippingAddressLine1 String?
+  shippingAddressLine2 String?
+  shippingCity         String?
+  shippingState        String?
+  shippingPostalCode   String?
+  shippingCountry      String  @default("US")
+
+  stripePaymentIntentId String?   @unique
+  stripeChargeId        String?
+  paidAt                DateTime?
+
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmContent  String?
+  utmTerm     String?
+  fbclid      String?
+  gclid       String?
+  ttclid      String?
+  ipAddress   String?
+  userAgent   String?
+
+  purchaseEventSent Boolean @default(false)
+  taboolaPixelId    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String  @id @default(cuid())
+  orderId    String
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product @relation(fields: [productId], references: [id])
+  name       String
+  quantity   Int
+  priceCents Int
+
+  @@map("order_items")
+}
+
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  subject   String
+  bodyHtml  String
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@map("email_templates")
+}
+
+model ShippingSettings {
+  id            String   @id @default(cuid())
+  label         String   @default("Standard Shipping")
+  estimatedDays String   @default("5-7 business days")
+  priceCents    Int      @default(599)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("shipping_settings")
+}
+
+model CheckoutSettings {
+  id                      String   @id @default(cuid())
+  logoUrl                 String?
+  announcementBarEnabled  Boolean  @default(true)
+  announcementBarText     String   @default("You've got free shipping!")
+  announcementBarBgColor  String   @default("#008060")
+  announcementBarTextColor String  @default("#ffffff")
+  announcementBarFontSize Int      @default(12)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@map("checkout_settings")
+}
+
+model PixelSettings {
+  id                    String   @id @default(cuid())
+  metaPixelId           String?
+  metaAccessToken       String?
+  tiktokPixelId         String?
+  tiktokAccessToken     String?
+  googleAdsId           String?
+  googleConversionLabel String?
+  ga4MeasurementId      String?
+  ga4ApiSecret          String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("pixel_settings")
+}
