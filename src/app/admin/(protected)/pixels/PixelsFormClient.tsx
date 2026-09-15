@@ -59,7 +59,7 @@ export function PixelsFormClient({ initial }: { initial: PixelSettings }) {
   }
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <>
       <h1 className="text-2xl font-semibold">Tracking pixels</h1>
 
       <div className="space-y-4 rounded-lg border border-neutral-200 bg-white p-6">
@@ -102,6 +102,6 @@ export function PixelsFormClient({ initial }: { initial: PixelSettings }) {
       >
         {saving ? "Saving..." : "Save settings"}
       </button>
-    </div>
+    </>
   );
 }

@@ -124,6 +124,15 @@ model CheckoutSettings {
   @@map("checkout_settings")
 }
 
+model TaboolaPixel {
+  id        String   @id @default(cuid())
+  name      String
+  pixelId   String
+  createdAt DateTime @default(now())
+
+  @@map("taboola_pixels")
+}
+
 model PixelSettings {
   id                    String   @id @default(cuid())
   metaPixelId           String?

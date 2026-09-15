@@ -4,13 +4,17 @@ import { ProductForm } from "@/components/ProductForm";
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const product = await prisma.product.findUnique({ where: { id } });
+  const [product, taboolaPixels] = await Promise.all([
+    prisma.product.findUnique({ where: { id } }),
+    prisma.taboolaPixel.findMany({ orderBy: { createdAt: "desc" } }),
+  ]);
   if (!product) notFound();
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Edit product</h1>
       <ProductForm
+        taboolaPixels={taboolaPixels}
         initial={{
           id: product.id,
           name: product.name,

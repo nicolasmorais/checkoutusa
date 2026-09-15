@@ -18,7 +18,15 @@ export type ProductFormValues = {
   taboolaPixelId: string;
 };
 
-export function ProductForm({ initial }: { initial?: ProductFormValues }) {
+export type TaboolaPixelOption = { id: string; name: string; pixelId: string };
+
+export function ProductForm({
+  initial,
+  taboolaPixels = [],
+}: {
+  initial?: ProductFormValues;
+  taboolaPixels?: TaboolaPixelOption[];
+}) {
   const router = useRouter();
   const [values, setValues] = useState<ProductFormValues>(
     initial ?? {
@@ -141,15 +149,33 @@ export function ProductForm({ initial }: { initial?: ProductFormValues }) {
       </div>
 
       <div>
-        <label className="text-sm font-medium">Taboola Pixel ID (optional)</label>
-        <input
-          placeholder="1234567"
+        <label className="text-sm font-medium">Taboola pixel (optional)</label>
+        <select
           className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2"
           value={values.taboolaPixelId}
           onChange={(e) => update("taboolaPixelId", e.target.value)}
-        />
+        >
+          <option value="">None</option>
+          {values.taboolaPixelId && !taboolaPixels.some((p) => p.pixelId === values.taboolaPixelId) && (
+            <option value={values.taboolaPixelId}>Unregistered ({values.taboolaPixelId})</option>
+          )}
+          {taboolaPixels.map((p) => (
+            <option key={p.id} value={p.pixelId}>
+              {p.name} ({p.pixelId})
+            </option>
+          ))}
+        </select>
         <p className="mt-1 text-xs text-neutral-500">
-          Fires a page view on this product&apos;s checkout and a purchase event on success — separate from the global pixels.
+          Fires a page view on this product&apos;s checkout and a purchase event on success — separate from the global pixels.{" "}
+          {taboolaPixels.length === 0 && (
+            <>
+              No pixels registered yet — add one on the{" "}
+              <a href="/admin/pixels" className="underline">
+                Pixels
+              </a>{" "}
+              page.
+            </>
+          )}
         </p>
       </div>
 
