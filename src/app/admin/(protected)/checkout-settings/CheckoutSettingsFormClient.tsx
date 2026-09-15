@@ -203,7 +203,7 @@ export function CheckoutSettingsFormClient({
         <div>
           <label className="text-sm font-medium">Checkout button</label>
           <p className="mt-0.5 text-xs text-neutral-500">
-            Colors used for the "Continue" and "Pay now" buttons on the checkout page.
+            Colors used for the &quot;Continue&quot; and &quot;Pay now&quot; buttons on the checkout page.
           </p>
         </div>
 
