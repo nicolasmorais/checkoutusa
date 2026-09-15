@@ -59,8 +59,57 @@ const US_STATES = [
   "SD","TN","TX","UT","VT","VA","WA","WV","WI","WY",
 ];
 
+const FULL_NAME_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ'-]{2,}(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ'-]{2,})+$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
+const CITY_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ'\-\s]{2,}$/;
+const ZIP_REGEX = /^\d{5}(-\d{4})?$/;
+
+type FieldErrors = Partial<Record<keyof FormState, string>>;
+
+function validateContactFields(form: FormState, requiresShipping: boolean): FieldErrors {
+  const errors: FieldErrors = {};
+
+  if (!FULL_NAME_REGEX.test(form.customerName.trim())) {
+    errors.customerName = "Enter your first and last name";
+  }
+  if (!EMAIL_REGEX.test(form.customerEmail.trim())) {
+    errors.customerEmail = "Enter a valid email address";
+  }
+  if (form.customerPhone.replace(/\D/g, "").length < 10) {
+    errors.customerPhone = "Enter a valid phone number";
+  }
+
+  if (requiresShipping) {
+    if (form.shippingAddressLine1.trim().length < 3) {
+      errors.shippingAddressLine1 = "Enter your street address";
+    }
+    if (form.shippingAddressLine2.trim().length < 1) {
+      errors.shippingAddressLine2 = "Enter apartment, suite, etc.";
+    }
+    if (!CITY_REGEX.test(form.shippingCity.trim())) {
+      errors.shippingCity = "Enter a valid city";
+    }
+    if (!form.shippingState) {
+      errors.shippingState = "Select a state";
+    }
+    if (!ZIP_REGEX.test(form.shippingPostalCode.trim())) {
+      errors.shippingPostalCode = "Enter a valid ZIP code";
+    }
+  }
+
+  return errors;
+}
+
+const fieldErrorClass = "mt-1 text-xs text-red-600";
+const errorInputClass = "border-red-400 focus:border-red-500 focus:ring-red-500";
+
 const inputClass =
-  "w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-[15px] text-neutral-900 placeholder:text-neutral-400 outline-none transition focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900";
+  "w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-3 text-base text-neutral-900 placeholder:text-neutral-400 outline-none transition focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900";
+
+// Fixed, full-width CTA on mobile so the primary action is always one tap away without
+// scrolling; on desktop it collapses back into the normal in-flow button.
+const ctaButtonClass =
+  "fixed inset-x-0 bottom-0 z-30 rounded-none py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-base font-semibold shadow-[0_-4px_16px_rgba(0,0,0,0.08)] transition hover:brightness-90 disabled:opacity-50 lg:static lg:z-auto lg:w-full lg:rounded-md lg:py-3.5 lg:pb-3.5 lg:shadow-none";
 
 type Step = 1 | 2 | 3;
 
@@ -117,6 +166,7 @@ export function CheckoutClient({
   const [orderId, setOrderId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const shipping: ShippingSettings =
     initialShipping ?? { label: "Standard Shipping", estimatedDays: "5-7 business days", priceCents: 599 };
   const logoUrl = initialLogoUrl;
@@ -150,6 +200,7 @@ export function CheckoutClient({
 
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
+    setFieldErrors((errs) => (errs[key] ? { ...errs, [key]: undefined } : errs));
   }
 
   async function createPaymentIntent() {
@@ -184,6 +235,12 @@ export function CheckoutClient({
 
   function handleContactSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const errors = validateContactFields(form, product.requiresShipping);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+    setFieldErrors({});
     if (product.requiresShipping) {
       setStep(2);
     } else {
@@ -271,7 +328,7 @@ export function CheckoutClient({
 
       <div className="mx-auto grid max-w-6xl lg:grid-cols-2">
         {/* Left: form */}
-        <div className="px-4 py-8 lg:px-8 lg:py-12">
+        <div className="px-4 pb-28 pt-6 lg:px-8 lg:py-12">
           <div className="mx-auto max-w-md lg:ml-auto lg:mr-0 lg:max-w-lg">
             {/* Breadcrumb */}
             <nav className="mb-8 flex items-center justify-center gap-2 text-sm">
@@ -305,30 +362,50 @@ export function CheckoutClient({
                     <div>
                       <input
                         required
+                        autoFocus
+                        name="name"
+                        autoComplete="name"
+                        autoCapitalize="words"
                         placeholder="Jane Doe"
-                        className={inputClass}
+                        className={cn(inputClass, fieldErrors.customerName && errorInputClass)}
+                        aria-invalid={!!fieldErrors.customerName}
                         value={form.customerName}
                         onChange={(e) => updateField("customerName", e.target.value)}
                       />
+                      {fieldErrors.customerName && <p className={fieldErrorClass}>{fieldErrors.customerName}</p>}
                     </div>
                     <div>
                       <input
                         required
                         type="email"
+                        name="email"
+                        inputMode="email"
+                        autoComplete="email"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck={false}
                         placeholder="jane@example.com"
-                        className={inputClass}
+                        className={cn(inputClass, fieldErrors.customerEmail && errorInputClass)}
+                        aria-invalid={!!fieldErrors.customerEmail}
                         value={form.customerEmail}
                         onChange={(e) => updateField("customerEmail", e.target.value)}
                       />
+                      {fieldErrors.customerEmail && <p className={fieldErrorClass}>{fieldErrors.customerEmail}</p>}
                     </div>
                     <div>
                       <input
                         required
+                        type="tel"
+                        name="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
                         placeholder="(555) 000-0000"
-                        className={inputClass}
+                        className={cn(inputClass, fieldErrors.customerPhone && errorInputClass)}
+                        aria-invalid={!!fieldErrors.customerPhone}
                         value={form.customerPhone}
                         onChange={(e) => updateField("customerPhone", e.target.value)}
                       />
+                      {fieldErrors.customerPhone && <p className={fieldErrorClass}>{fieldErrors.customerPhone}</p>}
                     </div>
                   </div>
                 </section>
@@ -340,35 +417,57 @@ export function CheckoutClient({
                       <div>
                         <input
                           required
+                          name="address-line1"
+                          autoComplete="address-line1"
+                          autoCapitalize="words"
                           placeholder="123 Main St"
-                          className={inputClass}
+                          className={cn(inputClass, fieldErrors.shippingAddressLine1 && errorInputClass)}
+                          aria-invalid={!!fieldErrors.shippingAddressLine1}
                           value={form.shippingAddressLine1}
                           onChange={(e) => updateField("shippingAddressLine1", e.target.value)}
                         />
+                        {fieldErrors.shippingAddressLine1 && (
+                          <p className={fieldErrorClass}>{fieldErrors.shippingAddressLine1}</p>
+                        )}
                       </div>
                       <div>
                         <input
                           required
+                          name="address-line2"
+                          autoComplete="address-line2"
+                          autoCapitalize="words"
                           placeholder="Apt 4B"
-                          className={inputClass}
+                          className={cn(inputClass, fieldErrors.shippingAddressLine2 && errorInputClass)}
+                          aria-invalid={!!fieldErrors.shippingAddressLine2}
                           value={form.shippingAddressLine2}
                           onChange={(e) => updateField("shippingAddressLine2", e.target.value)}
                         />
+                        {fieldErrors.shippingAddressLine2 && (
+                          <p className={fieldErrorClass}>{fieldErrors.shippingAddressLine2}</p>
+                        )}
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <input
                             required
+                            name="address-level2"
+                            autoComplete="address-level2"
+                            autoCapitalize="words"
                             placeholder="New York"
-                            className={inputClass}
+                            className={cn(inputClass, fieldErrors.shippingCity && errorInputClass)}
+                            aria-invalid={!!fieldErrors.shippingCity}
                             value={form.shippingCity}
                             onChange={(e) => updateField("shippingCity", e.target.value)}
                           />
+                          {fieldErrors.shippingCity && <p className={fieldErrorClass}>{fieldErrors.shippingCity}</p>}
                         </div>
                         <div>
                           <select
                             required
-                            className={inputClass}
+                            name="address-level1"
+                            autoComplete="address-level1"
+                            className={cn(inputClass, fieldErrors.shippingState && errorInputClass)}
+                            aria-invalid={!!fieldErrors.shippingState}
                             value={form.shippingState}
                             onChange={(e) => updateField("shippingState", e.target.value)}
                           >
@@ -379,20 +478,35 @@ export function CheckoutClient({
                               </option>
                             ))}
                           </select>
+                          {fieldErrors.shippingState && <p className={fieldErrorClass}>{fieldErrors.shippingState}</p>}
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <input
                             required
+                            name="postal-code"
+                            inputMode="numeric"
+                            autoComplete="postal-code"
+                            pattern="[0-9]*"
+                            maxLength={10}
                             placeholder="10001"
-                            className={inputClass}
+                            className={cn(inputClass, fieldErrors.shippingPostalCode && errorInputClass)}
+                            aria-invalid={!!fieldErrors.shippingPostalCode}
                             value={form.shippingPostalCode}
                             onChange={(e) => updateField("shippingPostalCode", e.target.value)}
                           />
+                          {fieldErrors.shippingPostalCode && (
+                            <p className={fieldErrorClass}>{fieldErrors.shippingPostalCode}</p>
+                          )}
                         </div>
                         <div>
-                          <input disabled value="United States" className={`${inputClass} bg-neutral-100 text-neutral-500`} />
+                          <input
+                            disabled
+                            autoComplete="country-name"
+                            value="United States"
+                            className={`${inputClass} bg-neutral-100 text-neutral-500`}
+                          />
                         </div>
                       </div>
                     </div>
@@ -405,7 +519,7 @@ export function CheckoutClient({
                   type="submit"
                   disabled={loading}
                   style={{ backgroundColor: buttonColors.bg, color: buttonColors.text }}
-                  className="w-full rounded-md py-3.5 text-base font-semibold transition hover:brightness-90 disabled:opacity-50"
+                  className={ctaButtonClass}
                 >
                   {loading
                     ? "Loading..."
@@ -442,7 +556,7 @@ export function CheckoutClient({
                   onClick={createPaymentIntent}
                   disabled={loading}
                   style={{ backgroundColor: buttonColors.bg, color: buttonColors.text }}
-                  className="w-full rounded-md py-3.5 text-base font-semibold transition hover:brightness-90 disabled:opacity-50"
+                  className={ctaButtonClass}
                 >
                   {loading ? "Loading..." : "Continue to payment"}
                 </button>
@@ -688,7 +802,7 @@ function PaymentStep({
           type="submit"
           disabled={!stripe || !paymentElementReady || submitting}
           style={{ backgroundColor: buttonColors.bg, color: buttonColors.text }}
-          className="w-full rounded-md py-3.5 text-base font-semibold transition hover:brightness-90 disabled:opacity-50"
+          className={ctaButtonClass}
         >
           {submitting ? "Processing..." : `Pay now · ${formatCents(totalCents, currency)}`}
         </button>

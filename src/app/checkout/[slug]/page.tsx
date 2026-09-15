@@ -20,6 +20,11 @@ export default async function CheckoutPage({
 
   return (
     <Suspense fallback={<div className="p-16 text-center text-neutral-600">Loading...</div>}>
+      {/* Warm up the connection to Stripe before Elements needs it, so payment step loads instantly on mobile networks */}
+      <link rel="preconnect" href="https://js.stripe.com" />
+      <link rel="preconnect" href="https://api.stripe.com" />
+      <link rel="dns-prefetch" href="https://js.stripe.com" />
+      <link rel="dns-prefetch" href="https://api.stripe.com" />
       <CheckoutClient
         product={{
           id: product.id,

@@ -3,17 +3,27 @@ import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import { z } from "zod";
 
+const FULL_NAME_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ'-]{2,}(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ'-]{2,})+$/;
+const CITY_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ'\-\s]{2,}$/;
+const ZIP_REGEX = /^\d{5}(-\d{4})?$/;
+
 const schema = z.object({
   productId: z.string().min(1),
   quantity: z.number().int().positive().max(50).default(1),
-  customerName: z.string().min(1),
-  customerEmail: z.string().email(),
-  customerPhone: z.string().min(1),
-  shippingAddressLine1: z.string().min(1),
-  shippingAddressLine2: z.string().min(1),
-  shippingCity: z.string().min(1),
+  customerName: z
+    .string()
+    .trim()
+    .regex(FULL_NAME_REGEX, "Enter your first and last name"),
+  customerEmail: z.string().trim().email(),
+  customerPhone: z
+    .string()
+    .trim()
+    .refine((v) => v.replace(/\D/g, "").length >= 10, "Enter a valid phone number"),
+  shippingAddressLine1: z.string().trim().min(3),
+  shippingAddressLine2: z.string().trim().min(1),
+  shippingCity: z.string().trim().regex(CITY_REGEX, "Enter a valid city"),
   shippingState: z.string().min(1),
-  shippingPostalCode: z.string().min(1),
+  shippingPostalCode: z.string().trim().regex(ZIP_REGEX, "Enter a valid ZIP code"),
   shippingCountry: z.string().default("US"),
   utmSource: z.string().optional(),
   utmMedium: z.string().optional(),
