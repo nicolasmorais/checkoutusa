@@ -13,8 +13,6 @@ import { ChevronDown, ChevronUp, Loader2, Lock, ShieldCheck } from "lucide-react
 import { formatCents, cn } from "@/lib/utils";
 import { PixelScripts, usePixelSettings } from "@/components/PixelScripts";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "");
-
 type ShippingSettings = {
   label: string;
   estimatedDays: string;
@@ -120,6 +118,7 @@ export function CheckoutClient({
   initialPixelSettings,
   initialAnnouncementBar,
   initialButtonColors,
+  stripePublishableKey,
 }: {
   product: Product;
   initialLogoUrl?: string | null;
@@ -133,9 +132,14 @@ export function CheckoutClient({
     fontSize: number;
   };
   initialButtonColors?: { bg: string; text: string };
+  stripePublishableKey: string;
 }) {
   const searchParams = useSearchParams();
   const pixelSettings = usePixelSettings(initialPixelSettings);
+  const stripePromise = useMemo(
+    () => (stripePublishableKey ? loadStripe(stripePublishableKey) : null),
+    [stripePublishableKey]
+  );
 
   const steps = product.requiresShipping
     ? [
@@ -563,7 +567,13 @@ export function CheckoutClient({
               </div>
             )}
 
-            {step === 3 && clientSecret && (
+            {step === 3 && clientSecret && !stripePromise && (
+              <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+                Payment is temporarily unavailable. Please try again shortly.
+              </p>
+            )}
+
+            {step === 3 && clientSecret && stripePromise && (
               <Elements stripe={stripePromise} options={{ clientSecret, locale: "en", appearance: { theme: "stripe" } }}>
                 <PaymentStep
                   totalCents={totalCents}

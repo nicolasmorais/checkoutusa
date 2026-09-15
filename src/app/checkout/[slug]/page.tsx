@@ -61,6 +61,7 @@ export default async function CheckoutPage({
           googleConversionLabel: pixelSettings?.googleConversionLabel ?? null,
           ga4MeasurementId: pixelSettings?.ga4MeasurementId ?? null,
         }}
+        stripePublishableKey={process.env.STRIPE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ""}
       />
     </Suspense>
   );
