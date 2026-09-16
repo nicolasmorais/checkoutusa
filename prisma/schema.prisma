@@ -118,6 +118,7 @@ model CheckoutSettings {
   announcementBarFontSize Int      @default(12)
   buttonColor             String   @default("#008060")
   buttonTextColor         String   @default("#ffffff")
+  stripePublishableKey    String?
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 

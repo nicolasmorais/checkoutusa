@@ -18,6 +18,7 @@ export default async function CheckoutSettingsPage() {
       initialAnnouncementBarFontSize={settings.announcementBarFontSize}
       initialButtonColor={settings.buttonColor}
       initialButtonTextColor={settings.buttonTextColor}
+      initialStripePublishableKey={settings.stripePublishableKey ?? ""}
     />
   );
 }

@@ -12,6 +12,7 @@ export function CheckoutSettingsFormClient({
   initialAnnouncementBarFontSize,
   initialButtonColor,
   initialButtonTextColor,
+  initialStripePublishableKey,
 }: {
   initialLogoUrl: string;
   initialAnnouncementBarEnabled: boolean;
@@ -21,6 +22,7 @@ export function CheckoutSettingsFormClient({
   initialAnnouncementBarFontSize: number;
   initialButtonColor: string;
   initialButtonTextColor: string;
+  initialStripePublishableKey: string;
 }) {
   const [logoUrl, setLogoUrl] = useState(initialLogoUrl);
   const [announcementBarEnabled, setAnnouncementBarEnabled] = useState(initialAnnouncementBarEnabled);
@@ -30,6 +32,7 @@ export function CheckoutSettingsFormClient({
   const [announcementBarFontSize, setAnnouncementBarFontSize] = useState(initialAnnouncementBarFontSize);
   const [buttonColor, setButtonColor] = useState(initialButtonColor);
   const [buttonTextColor, setButtonTextColor] = useState(initialButtonTextColor);
+  const [stripePublishableKey, setStripePublishableKey] = useState(initialStripePublishableKey);
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
@@ -46,6 +49,7 @@ export function CheckoutSettingsFormClient({
         announcementBarFontSize,
         buttonColor,
         buttonTextColor,
+        stripePublishableKey,
       }),
     });
     setSaving(false);
@@ -252,6 +256,31 @@ export function CheckoutSettingsFormClient({
           >
             Continue to payment
           </button>
+        </div>
+
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        >
+          {saving ? "Saving..." : "Save checkout settings"}
+        </button>
+      </div>
+
+      <div className="space-y-4 rounded-lg border border-neutral-200 bg-white p-6">
+        <div>
+          <label className="text-sm font-medium">Stripe publishable key</label>
+          <p className="mt-0.5 text-xs text-neutral-500">
+            Overrides the STRIPE_PUBLISHABLE_KEY environment variable. Use this if your host doesn&apos;t
+            pass environment variables through reliably. This is the public key (starts with{" "}
+            <code>pk_</code>) — never paste a secret key (<code>sk_</code>) here.
+          </p>
+          <input
+            placeholder="pk_live_..."
+            className="mt-2 w-full rounded-md border border-neutral-300 px-3 py-2 font-mono text-sm"
+            value={stripePublishableKey}
+            onChange={(e) => setStripePublishableKey(e.target.value)}
+          />
         </div>
 
         <button

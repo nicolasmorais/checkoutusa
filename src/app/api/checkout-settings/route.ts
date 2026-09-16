@@ -45,6 +45,8 @@ export async function PUT(req: NextRequest) {
     typeof body.buttonTextColor === "string" && HEX_RE.test(body.buttonTextColor)
       ? body.buttonTextColor
       : "#ffffff";
+  const stripePublishableKey =
+    typeof body.stripePublishableKey === "string" ? body.stripePublishableKey.trim() : "";
 
   const data = {
     logoUrl: logoUrl || null,
@@ -55,6 +57,7 @@ export async function PUT(req: NextRequest) {
     announcementBarFontSize,
     buttonColor,
     buttonTextColor,
+    stripePublishableKey: stripePublishableKey || null,
   };
 
   const settings = await prisma.checkoutSettings.upsert({
