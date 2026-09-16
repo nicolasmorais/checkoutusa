@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
-import { resend, RESEND_FROM_EMAIL } from "@/lib/resend";
+import { getResendClient, getResendFromEmail } from "@/lib/resend";
 import { renderEmailTemplate, DEFAULT_EMAIL_SUBJECT, DEFAULT_EMAIL_BODY } from "@/lib/email-templates";
 import Stripe from "stripe";
 
@@ -45,12 +45,16 @@ export async function POST(req: NextRequest) {
             order
           );
           try {
-            await resend.emails.send({
-              from: RESEND_FROM_EMAIL,
+            const resend = getResendClient(template?.resendApiKey);
+            const { error: sendError } = await resend.emails.send({
+              from: getResendFromEmail(template?.resendFromEmail),
               to: order.customerEmail,
               subject,
               html,
             });
+            if (sendError) {
+              console.error("Resend rejected the order confirmation email", sendError);
+            }
           } catch (err) {
             console.error("Failed to send order confirmation email", err);
           }

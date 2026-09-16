@@ -88,11 +88,13 @@ model OrderItem {
 }
 
 model EmailTemplate {
-  id        String   @id @default(cuid())
-  subject   String
-  bodyHtml  String
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  subject       String
+  bodyHtml      String
+  resendApiKey  String?
+  resendFromEmail String?
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
 
   @@map("email_templates")
 }

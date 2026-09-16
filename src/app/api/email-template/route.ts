@@ -30,11 +30,20 @@ export async function PUT(req: NextRequest) {
   if (typeof body.subject !== "string" || typeof body.bodyHtml !== "string") {
     return NextResponse.json({ error: "subject and bodyHtml are required" }, { status: 400 });
   }
+  const resendApiKey = typeof body.resendApiKey === "string" ? body.resendApiKey.trim() : "";
+  const resendFromEmail = typeof body.resendFromEmail === "string" ? body.resendFromEmail.trim() : "";
+
+  const data = {
+    subject: body.subject,
+    bodyHtml: body.bodyHtml,
+    resendApiKey: resendApiKey || null,
+    resendFromEmail: resendFromEmail || null,
+  };
 
   const template = await prisma.emailTemplate.upsert({
     where: { id: SINGLETON_ID },
-    update: { subject: body.subject, bodyHtml: body.bodyHtml },
-    create: { id: SINGLETON_ID, subject: body.subject, bodyHtml: body.bodyHtml },
+    update: data,
+    create: { id: SINGLETON_ID, ...data },
   });
 
   return NextResponse.json(template);

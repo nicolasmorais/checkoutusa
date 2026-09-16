@@ -9,5 +9,14 @@ export default async function EmailTemplatePage() {
     create: { id: "singleton", subject: DEFAULT_EMAIL_SUBJECT, bodyHtml: DEFAULT_EMAIL_BODY },
   });
 
-  return <EmailTemplateFormClient initial={{ subject: template.subject, bodyHtml: template.bodyHtml }} />;
+  return (
+    <EmailTemplateFormClient
+      initial={{
+        subject: template.subject,
+        bodyHtml: template.bodyHtml,
+        resendApiKey: template.resendApiKey ?? "",
+        resendFromEmail: template.resendFromEmail ?? "",
+      }}
+    />
+  );
 }

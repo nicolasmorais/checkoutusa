@@ -8,10 +8,12 @@ import { EMAIL_VARIABLES, DEFAULT_EMAIL_SUBJECT, DEFAULT_EMAIL_BODY, renderEmail
 export function EmailTemplateFormClient({
   initial,
 }: {
-  initial: { subject: string; bodyHtml: string };
+  initial: { subject: string; bodyHtml: string; resendApiKey: string; resendFromEmail: string };
 }) {
   const [subject, setSubject] = useState(initial.subject);
   const [bodyHtml, setBodyHtml] = useState(initial.bodyHtml);
+  const [resendApiKey, setResendApiKey] = useState(initial.resendApiKey);
+  const [resendFromEmail, setResendFromEmail] = useState(initial.resendFromEmail);
   const [saving, setSaving] = useState(false);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
 
@@ -39,7 +41,7 @@ export function EmailTemplateFormClient({
     const res = await fetch("/api/email-template", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subject, bodyHtml }),
+      body: JSON.stringify({ subject, bodyHtml, resendApiKey, resendFromEmail }),
     });
     setSaving(false);
     if (res.ok) toast.success("Email template saved");
@@ -73,6 +75,34 @@ export function EmailTemplateFormClient({
           >
             {saving ? "Saving..." : "Save template"}
           </button>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-neutral-200 bg-white p-5">
+        <h2 className="mb-1 text-sm font-semibold">Sending settings</h2>
+        <p className="mb-3 text-xs text-neutral-500">
+          Overrides the RESEND_API_KEY / RESEND_FROM_EMAIL environment variables. Use this if your
+          host doesn&apos;t pass environment variables through reliably.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-neutral-700">Resend API key</label>
+            <input
+              placeholder="re_..."
+              className="w-full rounded-md border border-neutral-300 px-3 py-2 font-mono text-sm outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+              value={resendApiKey}
+              onChange={(e) => setResendApiKey(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-neutral-700">From email</label>
+            <input
+              placeholder="onboarding@resend.dev"
+              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+              value={resendFromEmail}
+              onChange={(e) => setResendFromEmail(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 
