@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { formatCents } from "@/lib/utils";
 import { OrderStatusSelect } from "@/components/OrderStatusSelect";
+import { EmailLogCard } from "./EmailLogCard";
 
 function InfoRow({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) return null;
@@ -19,7 +20,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const { id } = await params;
   const order = await prisma.order.findUnique({
     where: { id },
-    include: { items: true },
+    include: { items: true, emailLogs: { orderBy: { createdAt: "desc" } } },
   });
 
   if (!order) notFound();
@@ -163,6 +164,18 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <InfoRow label="IP address" value={order.ipAddress} />
             <InfoRow label="User agent" value={order.userAgent ? order.userAgent.slice(0, 60) + (order.userAgent.length > 60 ? "…" : "") : undefined} />
           </div>
+
+          <EmailLogCard
+            orderId={order.id}
+            logs={order.emailLogs.map((log) => ({
+              id: log.id,
+              type: log.type,
+              toEmail: log.toEmail,
+              status: log.status,
+              errorMessage: log.errorMessage,
+              createdAt: log.createdAt.toISOString(),
+            }))}
+          />
         </div>
       </div>
     </div>

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
-import { getResendClient, getResendFromEmail } from "@/lib/resend";
-import { renderEmailTemplate, DEFAULT_EMAIL_SUBJECT, DEFAULT_EMAIL_BODY } from "@/lib/email-templates";
+import { sendOrderConfirmationEmail } from "@/lib/send-order-email";
 import Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -28,36 +27,16 @@ export async function POST(req: NextRequest) {
       if (orderId) {
         const existing = await prisma.order.findUnique({ where: { id: orderId } });
         if (existing && existing.status !== "paid") {
-          const order = await prisma.order.update({
+          await prisma.order.update({
             where: { id: orderId },
             data: {
               status: "paid",
               paidAt: new Date(),
               stripeChargeId: typeof pi.latest_charge === "string" ? pi.latest_charge : undefined,
             },
-            include: { items: true },
           });
 
-          const template = await prisma.emailTemplate.findUnique({ where: { id: "singleton" } });
-          const { subject, html } = renderEmailTemplate(
-            template?.subject ?? DEFAULT_EMAIL_SUBJECT,
-            template?.bodyHtml ?? DEFAULT_EMAIL_BODY,
-            order
-          );
-          try {
-            const resend = getResendClient(template?.resendApiKey);
-            const { error: sendError } = await resend.emails.send({
-              from: getResendFromEmail(template?.resendFromEmail),
-              to: order.customerEmail,
-              subject,
-              html,
-            });
-            if (sendError) {
-              console.error("Resend rejected the order confirmation email", sendError);
-            }
-          } catch (err) {
-            console.error("Failed to send order confirmation email", err);
-          }
+          await sendOrderConfirmationEmail(orderId);
         }
       }
       break;
