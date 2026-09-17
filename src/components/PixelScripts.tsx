@@ -39,9 +39,11 @@ export function usePixelSettings(initial?: PublicPixelSettings) {
 export function PixelScripts({
   settings,
   taboolaPixelId,
+  taboolaEvent,
 }: {
   settings: PublicPixelSettings | null;
   taboolaPixelId?: string | null;
+  taboolaEvent?: string | null;
 }) {
   return (
     <>
@@ -49,7 +51,7 @@ export function PixelScripts({
         <Script id="taboola-pixel" strategy="afterInteractive">
           {`
             window._tfa = window._tfa || [];
-            window._tfa.push({notify: 'event', name: 'page_view', id: ${JSON.stringify(taboolaPixelId)}});
+            ${taboolaEvent ? `window._tfa.push({notify: 'event', name: ${JSON.stringify(taboolaEvent)}, id: ${JSON.stringify(taboolaPixelId)}});` : ""}
             !function (t, f, a, x) {
               if (!document.getElementById(x)) {
                 t.async = 1; t.src = a; t.id = x; f.parentNode.insertBefore(t, f);

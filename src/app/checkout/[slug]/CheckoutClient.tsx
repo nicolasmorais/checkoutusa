@@ -291,7 +291,7 @@ export function CheckoutClient({
 
   return (
     <div className="min-h-screen bg-white text-neutral-900">
-      <PixelScripts settings={pixelSettings} taboolaPixelId={product.taboolaPixelId} />
+      <PixelScripts settings={pixelSettings} taboolaPixelId={product.taboolaPixelId} taboolaEvent="start_checkout" />
 
       <header className="border-b border-neutral-200">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-0 lg:px-8">
