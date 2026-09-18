@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
+import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 
 const links = [
   { href: "/admin/dashboard", label: "Dashboard" },
@@ -35,12 +36,15 @@ export function AdminNav() {
             ))}
           </div>
         </div>
-        <button
-          onClick={() => signOut({ callbackUrl: "/admin/login" })}
-          className="text-sm text-neutral-500 hover:text-neutral-900"
-        >
-          Sign out
-        </button>
+        <div className="flex items-center gap-3">
+          <PushNotificationToggle />
+          <button
+            onClick={() => signOut({ callbackUrl: "/admin/login" })}
+            className="text-sm text-neutral-500 hover:text-neutral-900"
+          >
+            Sign out
+          </button>
+        </div>
       </div>
     </nav>
   );

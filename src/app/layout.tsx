@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
@@ -11,6 +11,10 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Checkout USA",
   description: "Stripe-powered checkout for physical products",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#008060",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

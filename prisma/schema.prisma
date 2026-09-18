@@ -151,6 +151,16 @@ model TaboolaPixel {
   @@map("taboola_pixels")
 }
 
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@map("push_subscriptions")
+}
+
 model PixelSettings {
   id                    String   @id @default(cuid())
   metaPixelId           String?

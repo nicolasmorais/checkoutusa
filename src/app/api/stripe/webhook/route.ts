@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { sendOrderConfirmationEmail } from "@/lib/send-order-email";
+import { sendPushToAdmins } from "@/lib/push";
 import Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -37,6 +38,20 @@ export async function POST(req: NextRequest) {
           });
 
           await sendOrderConfirmationEmail(orderId);
+
+          const amount = (existing.totalCents / 100).toLocaleString("en-US", {
+            style: "currency",
+            currency: existing.currency.toUpperCase(),
+          });
+          try {
+            await sendPushToAdmins({
+              title: "New sale 🎉",
+              body: `Order #${existing.number} — ${existing.customerName} — ${amount}`,
+              url: `/admin/orders/${existing.id}`,
+            });
+          } catch (err) {
+            console.error("Failed to send sale push notification", err);
+          }
         }
       }
       break;
